@@ -1,67 +1,244 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cartelería de Precios — DIB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-  :root { --acento: #183C41; --gris: #f3f4f6; --texto: #1f2937; }
-  * { box-sizing: border-box; }
-  body { margin: 0; font-family: system-ui, Arial, sans-serif; color: var(--texto); background: #fff; }
-  header { background: var(--acento); color: #fff; padding: 14px 20px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
-  header h1 { font-size: 18px; margin: 0; flex: 1; }
-  header select { padding: 6px 8px; border-radius: 6px; border: 0; }
-  #estado { font-size: 12px; opacity: .85; width: 100%; }
-  main { max-width: 1100px; margin: 0 auto; padding: 16px 20px; }
-  #q { width: 100%; font-size: 18px; padding: 12px 14px; border: 2px solid #d1d5db; border-radius: 8px; }
-  #q:focus { outline: none; border-color: var(--acento); }
-  #chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
-  .chip { border: 1px solid #cbd5e1; background: #fff; border-radius: 999px; padding: 4px 12px; font-size: 13px; cursor: pointer; }
-  .chip.on { background: var(--acento); color: #fff; border-color: var(--acento); }
-  #res { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
-  .card { text-align: left; border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #fff; cursor: pointer; font: inherit; }
-  .card:hover { border-color: var(--acento); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
-  .card-nombre { font-weight: 700; }
-  .card-meta { font-size: 12px; color: #6b7280; margin: 4px 0; }
-  .card-precio { font-weight: 600; color: var(--acento); }
-  .off { background: #c8102e; color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-left: 6px; }
-  .hint { color: #6b7280; grid-column: 1/-1; }
-  .err { color: #b91c1c; grid-column: 1/-1; }
-  #panel { position: fixed; inset: 0; background: #fff; overflow: auto; padding: 20px; z-index: 10; }
-  .panel-head { display: flex; justify-content: space-between; align-items: center; }
-  .panel-head h2 { margin: 0; color: var(--acento); }
-  .panel-head button { font-size: 20px; border: 0; background: none; cursor: pointer; }
-  .meta { color: #6b7280; font-size: 13px; margin: 6px 0 14px; }
-  table { border-collapse: collapse; width: 100%; font-size: 14px; }
-  th, td { border-bottom: 1px solid #e5e7eb; padding: 8px 6px; text-align: left; }
-  .mono { font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
-  .mini { padding: 4px 10px; border: 1px solid var(--acento); color: var(--acento); background: #fff; border-radius: 6px; cursor: pointer; }
-  #preview { margin: 16px 0; }
-  #preview svg { max-width: 100%; height: auto; border: 1px dashed #cbd5e1; }
-  .acciones button { padding: 10px 18px; font-size: 15px; background: var(--acento); color: #fff; border: 0; border-radius: 8px; cursor: pointer; }
-  .acciones button:disabled { opacity: .4; cursor: default; }
-  #printRoot { display: none; }
-  @media print {
-    @page { margin: 0; }
-    body > *:not(#printRoot) { display: none !important; }
-    #printRoot { display: block; }
-    #printRoot svg { display: block; page-break-after: always; }
-  }
+/* ============================================================
+   Identidad compartida con «Control de Tienda» y «Datos Logísticos».
+   OJO: esta paleta es la de la APLICACIÓN. La cartelería impresa
+   mantiene su propia identidad (Arial + rojo #FF5050) y se dibuja
+   en SVG más abajo. No mezclar.
+   ============================================================ */
+:root{
+  --bg:#F2F1EC; --surface:#FFFFFF; --ink:#20242A; --ink-soft:#5B6169;
+  --line:#E1DFD6; --teal:#28565C; --teal-deep:#183C41; --brick:#B8412E;
+  --moss:#3E7D5A; --amber:#C08A2E; --muted:#9A9A8E; --radius:10px;
+  --acento:#28565C;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+.hidden{display:none !important}
+.app{max-width:1080px;margin:0 auto;padding:0 0 60px}
+
+/* ---------- Cabecera ---------- */
+header.top{background:var(--teal-deep);color:#F2F1EC;padding:20px 20px 0;border-bottom:4px solid var(--acento)}
+.brandrow{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.brandrow h1{font-family:'Space Grotesk',system-ui,sans-serif;font-size:22px;margin:0 0 4px;font-weight:700;letter-spacing:.2px}
+.brandrow .sub{font-size:12.5px;color:#B9C7C4;margin-bottom:14px}
+.hright{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-left:auto}
+.estado{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:#B9C7C4;white-space:nowrap}
+.estado b{width:9px;height:9px;border-radius:50%;background:var(--moss);flex-shrink:0}
+.estado.viejo b{background:var(--amber)}
+.applink{font-size:12.5px;font-weight:600;color:#C7D3D1;border:1px solid rgba(255,255,255,.25);
+  padding:6px 11px;border-radius:7px;text-decoration:none;white-space:nowrap}
+.applink:hover{background:rgba(255,255,255,.1);color:#fff}
+nav.tabs{display:flex;gap:2px;margin-top:4px}
+nav.tabs button{flex:1;background:transparent;color:#C7D3D1;padding:11px 6px;font-size:13px;
+  font-weight:600;border-bottom:3px solid transparent;font-family:'IBM Plex Sans',sans-serif}
+nav.tabs button.active{color:#fff;border-bottom-color:var(--acento)}
+
+/* ---------- Buscador ---------- */
+main{padding:20px 16px 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+label.field-label{display:block;font-size:11.5px;font-weight:600;color:var(--ink-soft);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.sbox{position:relative}
+.sbox input{width:100%;padding:15px 46px 15px 44px;border:1px solid var(--line);border-radius:9px;
+  font-family:'IBM Plex Sans',sans-serif;font-size:17px;background:#FBFAF7;color:var(--ink);outline:none}
+.sbox input:focus{border-color:var(--acento);background:#fff}
+.sbox .ico{position:absolute;left:15px;top:50%;transform:translateY(-50%);opacity:.4}
+.sbox .clr{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;
+  border-radius:50%;display:grid;place-items:center;color:var(--ink-soft);font-size:16px}
+.sbox .clr:hover{background:var(--bg)}
+.chips{display:block;margin-top:12px}
+/* --- navegación Línea › Familia › Subfamilia --- */
+.migas{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.migas .miga{font-size:13px;font-weight:700;color:var(--acento);padding:4px 9px;border-radius:6px;
+  border:1px solid transparent}
+.migas .miga:hover{border-color:var(--line);background:#FBFAF7}
+.migas .miga.act{color:var(--ink);background:#FBFAF7;border-color:var(--line);cursor:default}
+.migas .sep{color:var(--ink-soft);font-size:12px}
+/* --- lista de modelos dentro de un mismo nombre --- */
+.vl{display:flex;flex-direction:column;gap:5px;margin-bottom:18px;max-height:34vh;overflow:auto;
+  padding-right:3px}
+.vl button{text-align:left;width:100%;padding:8px 11px;border-radius:7px;border:1px solid var(--line);
+  background:#FBFAF7;display:block;transition:.1s}
+.vl button:hover{border-color:var(--acento)}
+.vl button.on{border-color:var(--acento);background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.vl button b{display:block;font-size:13px;font-weight:700;line-height:1.25}
+.vl button span{font-size:11.5px;color:var(--ink-soft)}
+.nivel{font-size:10.5px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-soft);margin:13px 0 8px}
+.chiprow{display:flex;gap:7px;flex-wrap:wrap}
+.chip{padding:7px 13px;border-radius:7px;background:#FBFAF7;border:1px solid var(--line);
+  font-size:12.5px;font-weight:600;color:var(--ink-soft)}
+.chip:hover{border-color:var(--acento);color:var(--ink)}
+.chip.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+
+/* ---------- Resultados ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:14px 15px;
+  text-align:left;width:100%;display:flex;flex-direction:column;gap:2px;transition:.12s}
+.pcard{cursor:pointer;position:relative}
+.pcard:hover{border-color:var(--acento);box-shadow:0 3px 12px rgba(24,60,65,.1)}
+.pcard.enb{border-color:var(--acento);background:#F4FAF9}
+/* botón de agregar a la hoja: discreto hasta que se pasa el mouse */
+.pcard .add{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:6px;
+  border:1px solid var(--line);background:#fff;font-size:15px;font-weight:700;line-height:1;
+  color:var(--ink-soft);display:grid;place-items:center;opacity:.45;transition:.12s;z-index:2}
+.pcard:hover .add,.pcard .add:focus-visible{opacity:1}
+.pcard.enb .add{opacity:1;background:var(--acento);color:#fff;border-color:var(--acento)}
+.acciones{display:flex;justify-content:flex-end;margin-bottom:10px}
+/* barra flotante con la selección */
+.barra{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:60;
+  display:flex;align-items:center;gap:10px;background:var(--ink);color:#fff;
+  padding:10px 12px 10px 18px;border-radius:11px;box-shadow:0 8px 30px rgba(0,0,0,.28);
+  max-width:calc(100vw - 28px);flex-wrap:wrap}
+.barra .n{font-size:14px;font-weight:700;white-space:nowrap}
+.barra .alerta{font-size:12.5px;color:#FFC9C9;max-width:260px}
+.barra .sec{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;
+  padding:9px 14px;border-radius:8px;font-size:13px;font-weight:600}
+.barra .sec:hover{background:rgba(255,255,255,.22)}
+@media print{.barra{display:none !important}}
+.pcard:focus-visible{outline:3px solid var(--acento);outline-offset:2px}
+.pcard .cat{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.pcard h3{margin:3px 0 0;font-family:'Space Grotesk',sans-serif;font-size:15.5px;font-weight:600;line-height:1.25}
+.pcard .desc{font-size:12.5px;color:var(--ink-soft)}
+.pcard .sku{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);margin-top:3px}
+.hoja .sub .sku-b{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:600;color:var(--ink)}
+.pcard .prices{display:flex;align-items:baseline;gap:9px;margin-top:10px;flex-wrap:wrap}
+.pcard .now{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:600;letter-spacing:-.02em}
+.pcard .now.off{color:var(--brick)}
+.pcard .old{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--muted);text-decoration:line-through}
+.pcard .dto{background:var(--brick);color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px}
+.empty{color:var(--ink-soft);font-size:14px;padding:50px 20px;text-align:center}
+.empty b{display:block;font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--ink);margin-bottom:6px}
+.mas{text-align:center;color:var(--ink-soft);font-size:12.5px;margin-top:16px}
+
+/* ---------- Hoja de impresión ---------- */
+.bg{position:fixed;inset:0;background:rgba(20,24,26,.55);z-index:50;display:flex;align-items:center;
+  justify-content:center;padding:18px}
+.hoja{background:var(--surface);border-radius:12px;width:100%;max-width:1020px;max-height:92vh;
+  display:grid;grid-template-columns:268px 1fr;grid-template-rows:minmax(0,1fr);
+  overflow:hidden;position:relative}
+@media(max-width:840px){.hoja{grid-template-columns:1fr;overflow:auto}}
+.hoja .izq{border-right:1px solid var(--line);padding:18px;overflow:auto;background:#FBFAF7}
+/* min-height:0 en la fila del grid + overflow en la columna: sin esto el
+   contenido crece por debajo del modal y en pantallas de 768 px de alto el
+   botón IMPRIMIR queda cortado y la gente no lo encuentra. */
+.hoja{align-items:stretch}
+.hoja>*{min-height:0}
+.hoja .der{padding:20px 22px;display:flex;flex-direction:column;min-height:0;overflow:auto}
+.hoja h2{font-family:'Space Grotesk',sans-serif;font-size:19px;margin:0 0 2px;font-weight:600;line-height:1.25}
+.hoja .sub{color:var(--ink-soft);font-size:13px;margin:0 0 12px}
+.pr{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;margin-bottom:12px}
+.pr .now{font-family:'IBM Plex Mono',monospace;font-size:31px;font-weight:600;letter-spacing:-.02em}
+.pr .now.off{color:var(--brick)}
+.pr .old{font-family:'IBM Plex Mono',monospace;font-size:16px;color:var(--muted);text-decoration:line-through}
+.fl{display:flex;flex-direction:column;gap:7px}
+.fl button{display:flex;gap:11px;align-items:center;padding:9px;border-radius:8px;border:1px solid transparent;
+  background:transparent;text-align:left;width:100%;transition:.12s}
+.fl button:hover{background:#fff;border-color:var(--line)}
+.fl button.on{background:#fff;border-color:var(--teal);box-shadow:0 2px 8px rgba(24,60,65,.1)}
+.fl .mini{width:58px;height:48px;flex-shrink:0;background:#fff;border:1px solid var(--line);
+  border-radius:5px;display:grid;place-items:center;overflow:hidden}
+.fl .mini svg{width:100%;height:100%;display:block}
+.fl b{display:block;font-size:13px;font-weight:600;line-height:1.25}
+.fl span{font-size:11.5px;color:var(--ink-soft)}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-soft);margin:0 0 9px}
+.prev{flex:1 1 auto;min-height:120px;background:
+  linear-gradient(45deg,#EAE8E1 25%,transparent 25%),linear-gradient(-45deg,#EAE8E1 25%,transparent 25%),
+  linear-gradient(45deg,transparent 75%,#EAE8E1 75%),linear-gradient(-45deg,transparent 75%,#EAE8E1 75%);
+  background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0;
+  border:1px solid var(--line);border-radius:9px;display:grid;place-items:center;padding:16px;overflow:auto}
+.prev .paper{background:#fff;box-shadow:0 3px 14px rgba(0,0,0,.15),0 16px 40px rgba(0,0,0,.09)}
+/* La fila de impresión queda anclada abajo: pase lo que pase con el largo del
+   contenido, IMPRIMIR siempre está a la vista sin tener que scrollear. */
+.acc{display:flex;gap:9px;align-items:center;margin-top:14px;flex-wrap:wrap;
+  position:sticky;bottom:-1px;background:var(--surface);padding:10px 0 2px;z-index:2}
+.acc::before{content:"";position:absolute;left:0;right:0;top:-14px;height:14px;
+  background:linear-gradient(to bottom,rgba(255,255,255,0),var(--surface))}
+.cant{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:8px;
+  background:#FBFAF7;padding:0 10px;height:46px;flex-shrink:0}
+.cant label{font-size:12px;font-weight:600;color:var(--ink-soft);white-space:nowrap}
+.cant input{width:58px;border:0;background:transparent;font-size:16px;font-weight:700;
+  text-align:center;outline:none;padding:0;font-family:inherit;color:var(--ink)}
+.acc select{padding:12px 11px;border:1px solid var(--line);border-radius:8px;background:#FBFAF7;
+  font-size:13.5px;font-weight:600;outline:none}
+.big{flex:1;min-width:190px;background:var(--teal-deep);color:#fff;padding:15px 22px;border-radius:8px;
+  font-size:15.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:9px}
+.big:hover{background:#0F2A2E}
+.big:disabled{background:var(--muted);cursor:not-allowed}
+.sec{padding:13px 16px;border-radius:8px;border:1px solid var(--line);font-weight:600;font-size:13.5px;background:#fff}
+.sec:hover{border-color:var(--teal)}
+.cerrar{position:absolute;top:12px;right:14px;width:34px;height:34px;border-radius:50%;
+  background:rgba(255,255,255,.94);display:grid;place-items:center;font-size:19px;color:var(--ink-soft);
+  z-index:60;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.nota{font-size:11.5px;color:var(--ink-soft);margin:11px 0 0;line-height:1.45}
+.aviso{border-radius:8px;padding:11px 13px;font-size:13px;border:1px solid;margin-bottom:11px}
+.aviso.err{background:#FBEAE7;border-color:#E8C4BC;color:#7E241A}
+.aviso.warn{background:#FAF3E2;border-color:#EBD9AE;color:#6E5219}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:200;background:var(--teal-deep);
+  color:#fff;padding:12px 20px;border-radius:9px;font-weight:600;font-size:14px;box-shadow:0 8px 30px rgba(0,0,0,.28)}
+
+/* ---------- Impresión ---------- */
+#printRoot{display:none}
+@media print{
+  html,body{background:#fff !important;margin:0 !important;padding:0 !important;border:0 !important}
+  body>*{display:none !important}
+  #printRoot{display:block !important}
+  .sheet{page-break-after:always;break-after:page;overflow:hidden}
+  .sheet:last-child{page-break-after:auto;break-after:auto}
+  .sheet svg{display:block}
+}
+</style>
+<style>
+  #selTienda{font:inherit;font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;cursor:pointer}
+  #selTienda option{color:#111}
+  .estado.err b{background:#c8102e}
+  .cargando{opacity:.55;pointer-events:none}
 </style>
 </head>
 <body>
-<header>
-  <h1 id="titulo">Cartelería DIB</h1>
-  <select id="selTienda" aria-label="Tienda y modo"></select>
-  <div id="estado">Conectando…</div>
-</header>
-<main>
-  <input id="q" type="search" placeholder="Busca por nombre o SKU (mín. 2 letras)" autocomplete="off">
-  <div id="chips"></div>
-  <div id="res"><p class="hint">Escribe al menos 2 letras o elige una línea.</p></div>
-</main>
-<section id="panel" hidden></section>
+<div class="app">
+  <header class="top">
+    <div class="brandrow">
+      <div>
+        <h1>Cartelería de Precios</h1>
+        <div class="sub" id="sub">Busca el producto e imprime su cartel — precios vigentes desde Odoo</div>
+      </div>
+      <div class="hright">
+        <div class="estado" id="estado"><b></b><span>—</span></div>
+        <select class="applink" id="selTienda" title="Tienda y lista"></select>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="card">
+      <label class="field-label" id="lblLista">Buscar producto</label>
+      <div class="sbox">
+        <svg class="ico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Nombre, código o medida — ej: alfombra, plumón, 160X230" autocomplete="off" autofocus>
+        <button class="clr hidden" id="clr" title="Limpiar">✕</button>
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div id="res"></div>
+  </main>
+</div>
+
+<div id="panel"></div>
 <div id="printRoot"></div>
-<script type="module" src="src/app.js"></script>
+
+<script src="src/api/client.js"></script>
+<script src="src/app.js"></script>
 </body>
 </html>

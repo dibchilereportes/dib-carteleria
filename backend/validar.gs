@@ -3,18 +3,26 @@
  */
 
 /** Espejo de config/tiendas.json: lo que el ERP necesita por tienda. */
+/* nombre = nombre EXACTO de la lista de precios en Odoo (Ventas → Listas de precios).
+   pricelist_id: déjalo en null y se busca por nombre; o pon el id numérico si lo conoces. */
 var CONFIG_TIENDAS = {
-  dib: { pricelist_id: 3, nombre: 'Tiendas DIB (CLP)', redondeo: 'peso' },
-  sur: { pricelist_id: 7, nombre: 'Tiendas Sur',       redondeo: 'peso' }
+  dib: { pricelist_id: 24894, nombre: 'Tiendas DIB', redondeo: 'peso' },
+  sur: { pricelist_id: 24983, nombre: 'Tiendas Sur', redondeo: 'peso' }
 };
 var MODOS = ['general', 'descartados'];
-var MOTIVOS_DESCARTE = ['SIN STOCK', 'DESCONTINUADO · FAMILIA', 'LINEA EXCLUIDA'];
+var MOTIVOS_DESCARTE = ['SIN STOCK', 'DESCONTINUADO', 'SIN PRECIO EN LISTA', 'PRECIO CERO'];
 
 var LIMITE_MAX = 100, LIMITE_DEF = 50, LOTE_MAX = 60, Q_MIN = 2, Q_MAX = 60;
 var RL_POR_MINUTO = 90;
 
 function props_() { return PropertiesService.getScriptProperties(); }
-function esMock_() { return props_().getProperty('ERP_MOCK') === '1'; }
+/** Modo simulado: si ERP_MOCK=1, o si todavía no hay ERP_URL configurada. Sin propiedades → simulado. */
+function esMock_() {
+  var m = props_().getProperty('ERP_MOCK');
+  if (m === '1') return true;
+  if (m === '0') return false;
+  return !credencialesListas_();   /* sin credenciales reales → simulado */
+}
 
 function limpiar_(s, max) {
   return String(s == null ? '' : s)

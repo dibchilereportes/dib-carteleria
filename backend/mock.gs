@@ -27,22 +27,8 @@ function mockBuscar_(f) {
   });
   return { records: rec };
 }
-function mockPorGrupo_(f) {
-  var g = norm_(f.grupo);
-  return { records: MOCK_PRODUCTOS.filter(function (r) { return nombreBase_(r.name) === g; }) };
-}
+function mockPorGrupo_(f) { return { records: MOCK_PRODUCTOS }; }   /* el handler filtra por grupo */
 function mockPorSkus_(tienda, skus) {
   return { records: MOCK_PRODUCTOS.filter(function (r) { return skus.indexOf(r.default_code) >= 0; }) };
 }
-function mockTaxonomia_() {
-  var tree = {};
-  MOCK_PRODUCTOS.forEach(function (r) {
-    tree[r.x_linea] = tree[r.x_linea] || {};
-    tree[r.x_linea][r.x_familia] = tree[r.x_linea][r.x_familia] || {};
-    tree[r.x_linea][r.x_familia][r.x_subfamilia] = 1;
-  });
-  return { tree: Object.keys(tree).map(function (l) {
-    return { nombre: l, familias: Object.keys(tree[l]).map(function (fa) {
-      return { nombre: fa, subfamilias: Object.keys(tree[l][fa]) }; }) };
-  }) };
-}
+function mockTaxonomia_() { return { records: MOCK_PRODUCTOS }; }

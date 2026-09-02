@@ -201,42 +201,33 @@ https://TUUSUARIO.github.io/dib-carteleria/
 
 ---
 
-## PARTE 4 — Conectar el ERP real (30–60 min, depende de tu API)
+## PARTE 4 — Conectar Odoo (15 min)
 
-Aquí sí hay que tocar código, pero solo **un archivo**: `backend/erp.gs`.
+El backend habla con Odoo por JSON-RPC. Solo hay que poner credenciales; los campos usados son estándar (`default_code`, `name`, `categ_id`, `list_price`, `price` con la lista de precios, `qty_available`, `active`).
 
-45. Abre el proyecto de Apps Script que **ya funciona** con el ERP y copia de ahí: la URL base, cómo manda la API key (header `Authorization: Bearer`, `X-API-Key`, o dentro del body), el endpoint de búsqueda de productos y los nombres reales de los campos.
-46. En `erp.gs` ajusta:
-    - `erpFetch_`: la línea `headers: { 'Authorization': 'Bearer ' + cfg.key }` → el esquema real.
-    - `erpBuscarProductos_`, `erpProductosPorGrupo_`, `erpProductoPorSku_`, `erpProductosPorSkus_`, `erpTaxonomia_`: el `path` y el formato del `payload` que espera tu API.
-    - `CAMPOS_ERP`: nombres reales (`x_linea`, `x_familia`, `list_price`… son de ejemplo). Los mismos nombres deben usarse en `aProducto_` de `mapear.gs`.
-    - `CONFIG_TIENDAS` en `validar.gs`: el `pricelist_id` real de cada lista de precios.
-47. Pega el `erp.gs` (y `mapear.gs`/`validar.gs` si los tocaste) en el editor de Apps Script → Guardar.
-48. Prueba **sin publicar** desde el editor: abre `handlers.gs`, arriba elige la función `hBuscar_`… no acepta parámetros desde el editor, así que crea temporalmente al final de `Code.gs`:
+45. En Apps Script abre el archivo `.gs` y busca el bloque `var ODOO = {` (sección erp.gs). Rellena:
+    - `url`: `https://odooconsultores-dib.odoo.com` (sin `/jsonrpc`)
+    - `db`: nombre técnico de la base
+    - `user`: tu login de Odoo
+    - `apiKey`: Odoo → Ajustes → Mi perfil → Seguridad de la cuenta → Claves API → Nueva clave
+46. Busca `var CONFIG_TIENDAS` (sección validar.gs) y comprueba que `nombre` sea **exactamente** el nombre de cada lista de precios en Odoo (Ventas → Configuración → Listas de precios). Si prefieres, pon el `pricelist_id` numérico.
+47. Guarda (Ctrl+S). Arriba, en el desplegable de funciones, elige **`pruebaOdoo`** → ▶ **Ejecutar**. La primera vez pide autorizar "conectarse a un servicio externo" → Permitir. En **Registro de ejecución** debe aparecer `Login OK, uid=…`, la lista de listas de precio y 5 productos con `x_precio_vigente`.
+    - `auth: login/API key rechazados` → usuario o API key incorrectos.
+    - `lista de precios no encontrada` → el `nombre` en `CONFIG_TIENDAS` no coincide con Odoo.
+48. **Implementar → Administrar implementaciones → ✏️ → Nueva versión → Implementar.**
+49. Recarga la app: la cabecera dice "en línea" (ya no "DATOS SIMULADOS"). Busca un producto real y compara 20 SKUs con el HTML antiguo.
 
-```javascript
-function pruebaLocal() {
-  PropertiesService.getScriptProperties().setProperty('ERP_MOCK', '0');
-  Logger.log(JSON.stringify(hBuscar_({ tienda: 'dib', modo: 'general', q: 'roller', linea: '', familia: '', subfamilia: '', motivo: '', limit: 10, pagina: 1 })));
-}
-```
-Selecciona `pruebaLocal` en el desplegable de arriba → **Ejecutar** → autoriza (ahora pide permiso para "conectarse a un servicio externo") → **Registro de ejecución** muestra el JSON. Si sale `ERP_ERROR`/`ERP_TIMEOUT`, el registro dice el HTTP real.
-49. Cuando funcione: ⚙️ Propiedades → `ERP_MOCK` = `0`, rellena `ERP_URL` y `ERP_API_KEY`. Borra `pruebaLocal`. Opcional: borra `mock.gs`.
-50. **Implementar → Administrar implementaciones → ✏️ → Nueva versión → Implementar.**
-51. Recarga la app en Pages: la cabecera ya no dice "DATOS SIMULADOS". Compara 20 SKUs contra el HTML antiguo del mismo día.
+**Seguridad:** el `.gs` con la clave real vive solo en Apps Script. No lo copies de vuelta a la carpeta `backend/` del repo (es público). Si más adelante quieres sacar la clave del código, crea las Propiedades del script `ERP_URL`, `ERP_DB`, `ERP_USER`, `ERP_API_KEY`: si existen, mandan sobre el bloque `ODOO{}`.
+
+Si tu Odoo tiene campos propios (motivo de descarte, outlet, variante), ajusta `ODOO_CAMPOS` en la misma sección.
 
 ---
 
-## PARTE 5 — Portar las 6 plantillas reales (2–3 días, trabajo de desarrollo)
+## PARTE 5 — Motor de carteles (ya portado)
 
-El scaffold imprime un cartel genérico de 130×180. Para reemplazarlo por `ALF_9X11`, `ALF_65X9`, `MUEBLES_8X5`, `TEX_LIM_NORMAL`, `TEX_LIM_PROMO`, `ROLLER_13X18`:
+`src/app.js` es el motor original de los 4 HTML (6 formatos, variantes, papel, copias, bandeja, marcas de corte, validaciones legales) con una sola diferencia: los datos llegan del backend por `api('buscar' | 'producto' | 'taxonomia')` en vez del bloque `DATOS` embebido. Las reglas de formato (`REGLAS_FORMATO`), nombres cortos y plantillas SVG están intactas y se editan en el mismo lugar que antes.
 
-52. Del HTML original (`carteleria_dib_6.html`) copia a `src/core/texto.js` las funciones `fitSize`, `anchoTexto`, `partirEnDos`; a `src/templates/_primitivas.js` las funciones `T`, `R`, `L`, `badgeOff`, `codigoSKU`, `pieLegal`, `bloquePPUM`, `envolver`, `kicker`; y a `src/print/` las funciones `PAPELES`, `imponer`, `marcasCorte`, `capacidadHoja`.
-53. Cada entrada de `TPLS` del HTML pasa a un archivo `src/templates/<id>.js` que exporta `{ id, nombre, tipo, w, h, aplica, render }` (ejemplo en `docs/ARQUITECTURA_CARTELERIA.md`, sección 6.1).
-54. En `src/app.js`, `cartelGenerico()` se reemplaza por `formatosPara(item)` + `TEMPLATES.get(id).render(ctx, cfg, P)`, y `previsualizar()` pasa a ofrecer los formatos permitidos + papel + copias (mismo flujo que la función `pintarHoja()` original).
-55. Los `items` que devuelve el backend tienen los mismos nombres de campo que usaba `normalizarProducto()` en el HTML (`sku, nombre, descripcion, categoria, familia, subfamilia, precio_normal, precio_oferta, dto, outlet, descontinuado, stock, motivo, ppum_valor, ppum_unidad`), así que las plantillas se portan sin cambiar su cuerpo.
-
-Cada avance: `git add . ; git commit -m "..." ; git push` → Pages se actualiza solo.
+Para actualizar el frontend después de un cambio: editar, `git add . ; git commit -m "..." ; git push` → Pages se actualiza solo en ~1 min.
 
 ---
 

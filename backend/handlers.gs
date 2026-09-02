@@ -22,14 +22,14 @@ function hProducto_(f) {
   var raw = f.sku ? erpProductoPorSku_(f) : erpProductosPorGrupo_(f);
   var cfg = CONFIG_TIENDAS[f.tienda];
   var items = (raw.records || []).map(function (r) { return aProducto_(r, cfg); });
-  if (f.grupo) items = items.filter(function (p) { return nombreBase_(p.nombre) === norm_(f.grupo); });
+  if (f.grupo) items = items.filter(function (p) { return claveGrupo_(p) === norm_(f.grupo); });
   items = filtrarPorModo_(items, f.modo);
   if (!items.length) throw err_('NO_ENCONTRADO', f.grupo || f.sku);
   var legal = legalPara_(f.tienda, items);
   return {
     ok: true,
     tienda: f.tienda, modo: f.modo,
-    grupo: f.grupo || nombreBase_(items[0].nombre),
+    grupo: f.grupo || claveGrupo_(items[0]),
     linea: items[0].categoria, familia: items[0].familia, subfamilia: items[0].subfamilia,
     legal: legal.texto, vig_desde: legal.desde, vig_hasta: legal.hasta,
     fecha: new Date().toISOString(),
@@ -48,9 +48,21 @@ function hLote_(f) {
            items: items, faltantes: faltantes };
 }
 
+/**
+ * Rutas distintas (motivo/línea/familia/subfamilia) con cantidad de productos.
+ * Es lo único "global" que recibe el navegador: ~700 filas cortas, sin precios ni SKU.
+ */
 function hTaxonomia_(tienda, modo) {
   return conCache_('tax:' + tienda + ':' + modo, 21600, function () {
     var raw = erpTaxonomia_(tienda);
+    var cfg = CONFIG_TIENDAS[tienda];
+    var items = filtrarPorModo_((raw.records || []).map(function (r) { return aProducto_(r, cfg); }), modo);
+    var m = {}, orden = [];
+    items.forEach(function (p) {
+      var k = [p.motivo, p.categoria, p.familia, p.subfamilia].join('|');
+      if (!m[k]) { m[k] = { motivo: p.motivo, categoria: p.categoria, familia: p.familia, subfamilia: p.subfamilia, n: 0 }; orden.push(k); }
+      m[k].n++;
+    });
     return {
       ok: true, tienda: tienda, modo: modo,
       niveles: modo === 'descartados'
@@ -58,8 +70,7 @@ function hTaxonomia_(tienda, modo) {
            { campo: 'familia', rotulo: 'Familia' }, { campo: 'subfamilia', rotulo: 'Subfamilia' }]
         : [{ campo: 'categoria', rotulo: 'Línea' }, { campo: 'familia', rotulo: 'Familia' },
            { campo: 'subfamilia', rotulo: 'Subfamilia' }],
-      arbol: raw.tree || [],
-      motivos: modo === 'descartados' ? MOTIVOS_DESCARTE : []
+      rutas: orden.map(function (k) { return m[k]; })
     };
   });
 }
