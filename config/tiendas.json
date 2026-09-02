@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "tiendas": {
+    "dib": {
+      "nombre": "Tienda DIB",
+      "acento": "#183C41",
+      "lista_erp": "Tiendas DIB (CLP)",
+      "plantillas": ["ALF_9X11", "ALF_65X9", "MUEBLES_8X5", "TEX_LIM_NORMAL", "TEX_LIM_PROMO", "ROLLER_13X18"],
+      "modos": ["general", "descartados"],
+      "redondeo": "peso"
+    },
+    "sur": {
+      "nombre": "Tienda Sur",
+      "acento": "#183C41",
+      "lista_erp": "Tiendas Sur",
+      "plantillas": ["ALF_9X11", "ALF_65X9", "MUEBLES_8X5", "TEX_LIM_NORMAL", "TEX_LIM_PROMO", "ROLLER_13X18"],
+      "modos": ["general", "descartados"],
+      "redondeo": "peso"
+    }
+  },
+  "modos": {
+    "general":     { "titulo": "Lista general", "acento": null, "filtro_stock": true },
+    "descartados": { "titulo": "Descartados · fuera del catálogo", "acento": "#8A5A00", "filtro_stock": false }
+  }
+}

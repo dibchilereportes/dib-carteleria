@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cartelería de Precios — DIB</title>
+<style>
+  :root { --acento: #183C41; --gris: #f3f4f6; --texto: #1f2937; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, Arial, sans-serif; color: var(--texto); background: #fff; }
+  header { background: var(--acento); color: #fff; padding: 14px 20px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  header h1 { font-size: 18px; margin: 0; flex: 1; }
+  header select { padding: 6px 8px; border-radius: 6px; border: 0; }
+  #estado { font-size: 12px; opacity: .85; width: 100%; }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px 20px; }
+  #q { width: 100%; font-size: 18px; padding: 12px 14px; border: 2px solid #d1d5db; border-radius: 8px; }
+  #q:focus { outline: none; border-color: var(--acento); }
+  #chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+  .chip { border: 1px solid #cbd5e1; background: #fff; border-radius: 999px; padding: 4px 12px; font-size: 13px; cursor: pointer; }
+  .chip.on { background: var(--acento); color: #fff; border-color: var(--acento); }
+  #res { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+  .card { text-align: left; border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #fff; cursor: pointer; font: inherit; }
+  .card:hover { border-color: var(--acento); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+  .card-nombre { font-weight: 700; }
+  .card-meta { font-size: 12px; color: #6b7280; margin: 4px 0; }
+  .card-precio { font-weight: 600; color: var(--acento); }
+  .off { background: #c8102e; color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-left: 6px; }
+  .hint { color: #6b7280; grid-column: 1/-1; }
+  .err { color: #b91c1c; grid-column: 1/-1; }
+  #panel { position: fixed; inset: 0; background: #fff; overflow: auto; padding: 20px; z-index: 10; }
+  .panel-head { display: flex; justify-content: space-between; align-items: center; }
+  .panel-head h2 { margin: 0; color: var(--acento); }
+  .panel-head button { font-size: 20px; border: 0; background: none; cursor: pointer; }
+  .meta { color: #6b7280; font-size: 13px; margin: 6px 0 14px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { border-bottom: 1px solid #e5e7eb; padding: 8px 6px; text-align: left; }
+  .mono { font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  .mini { padding: 4px 10px; border: 1px solid var(--acento); color: var(--acento); background: #fff; border-radius: 6px; cursor: pointer; }
+  #preview { margin: 16px 0; }
+  #preview svg { max-width: 100%; height: auto; border: 1px dashed #cbd5e1; }
+  .acciones button { padding: 10px 18px; font-size: 15px; background: var(--acento); color: #fff; border: 0; border-radius: 8px; cursor: pointer; }
+  .acciones button:disabled { opacity: .4; cursor: default; }
+  #printRoot { display: none; }
+  @media print {
+    @page { margin: 0; }
+    body > *:not(#printRoot) { display: none !important; }
+    #printRoot { display: block; }
+    #printRoot svg { display: block; page-break-after: always; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="titulo">Cartelería DIB</h1>
+  <select id="selTienda" aria-label="Tienda y modo"></select>
+  <div id="estado">Conectando…</div>
+</header>
+<main>
+  <input id="q" type="search" placeholder="Busca por nombre o SKU (mín. 2 letras)" autocomplete="off">
+  <div id="chips"></div>
+  <div id="res"><p class="hint">Escribe al menos 2 letras o elige una línea.</p></div>
+</main>
+<section id="panel" hidden></section>
+<div id="printRoot"></div>
+<script type="module" src="src/app.js"></script>
+</body>
+</html>

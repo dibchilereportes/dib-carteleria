@@ -1,0 +1,9 @@
+[
+  { "que": "Cortinas roller",           "nombre": "\\broller\\b",              "deja": ["ROLLER_13X18"] },
+  { "que": "Cojines y fundas de cojín", "nombre": "\\bcojin",                  "deja": ["TEX_LIM_NORMAL"] },
+  { "que": "Fundas de sofá",            "nombre": "\\bfunda\\s*(de\\s*)?sofa", "deja": ["TEX_LIM_NORMAL"] },
+  { "que": "Plumones y fundas",         "nombre": "\\bplumon",                 "deja": ["TEX_LIM_PROMO"] },
+  { "que": "Sábanas",                   "nombre": "\\bsabana",                 "deja": ["TEX_LIM_NORMAL", "TEX_LIM_PROMO"] },
+  { "que": "Almohadas",                 "nombre": "\\balmohad",                "deja": ["TEX_LIM_NORMAL", "TEX_LIM_PROMO"] },
+  { "que": "Sofás (sin agrupar)",       "categoria": "SOFAS",                  "agrupar": false }
+]

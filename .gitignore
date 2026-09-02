@@ -1,0 +1,9 @@
+# credenciales y config local: NUNCA al repo
+config/app.json
+backend/.clasp.json
+backend/.clasprc.json
+.env
+*.log
+node_modules/
+.DS_Store
+Thumbs.db
