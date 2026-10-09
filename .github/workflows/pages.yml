@@ -17,26 +17,48 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Generar config/app.json desde Variables del repo
         run: |
-          test -n "${{ vars.GAS_URL }}" || { echo "Falta la Variable GAS_URL en Settings > Secrets and variables > Actions > Variables"; exit 1; }
+          test -n "${{ vars.GAS_URL }}" || {
+            echo "ERROR: Falta la Variable GAS_URL"
+            exit 1
+          }
+
+          test -n "${{ vars.APP_TOKEN }}" || {
+            echo "ERROR: Falta la Variable APP_TOKEN"
+            exit 1
+          }
+
+          mkdir -p config
+
           cat > config/app.json <<EOF
-          { "gasUrl": "${{ vars.GAS_URL }}", "token": "${{ vars.APP_TOKEN }}", "build": "${GITHUB_SHA::7}" }
+          {
+            "gasUrl": "${{ vars.GAS_URL }}",
+            "token": "${{ vars.APP_TOKEN }}",
+            "build": "${GITHUB_SHA::7}"
+          }
           EOF
-          cat config/app.json
+
+          echo "Configuración generada correctamente."
+          echo "GAS_URL configurada: SI"
+          echo "APP_TOKEN configurado: SI"
 
       - name: Quitar carpetas que no se sirven
         run: rm -rf backend .github
 
       - uses: actions/configure-pages@v5
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: .
+
       - id: deployment
         uses: actions/deploy-pages@v4
