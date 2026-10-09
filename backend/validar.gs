@@ -67,11 +67,15 @@ function validarBuscar_(p) {
     linea: limpiar_(p.linea, 60),
     familia: limpiar_(p.familia, 60),
     subfamilia: limpiar_(p.subfamilia, 60),
+    medida: limpiar_(p.medida, 40),
     motivo: limpiar_(p.motivo, 60),
     limit: Math.min(LIMITE_MAX, Math.max(1, parseInt(p.limit, 10) || LIMITE_DEF)),
     pagina: Math.max(1, parseInt(p.pagina, 10) || 1)
   };
-  if (out.q.length < Q_MIN && !out.linea && !out.motivo) throw err_('CONSULTA_VACIA', 'falta q o linea');
+  /* dib/bazhars parten la navegación en "familia" (sin línea): hay que aceptar
+     cualquiera de los niveles como "ya hay un filtro", no solo linea/motivo. */
+  if (out.q.length < Q_MIN && !out.linea && !out.familia && !out.subfamilia && !out.medida && !out.motivo)
+    throw err_('CONSULTA_VACIA', 'falta q o linea');
   return out;
 }
 

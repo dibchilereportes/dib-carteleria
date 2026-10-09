@@ -10,6 +10,7 @@ function hBuscar_(f) {
     var items = (raw.records || []).map(function (r) { return aProducto_(r, cfg); });
     items = filtrarPorModo_(items, f.modo);
     if (f.motivo) items = items.filter(function (p) { return p.motivo === f.motivo; });
+    if (f.medida) items = items.filter(function (p) { return p.medida === f.medida; });
     var grupos = agruparPorNombre_(items).slice(0, f.limit);
     return {
       ok: true, tienda: f.tienda, modo: f.modo, lista: cfg.nombre,
@@ -48,8 +49,25 @@ function hLote_(f) {
            items: items, faltantes: faltantes };
 }
 
+/** Rótulo de cada nivel posible, para pintar el encabezado de los chips. */
+var ROTULOS_NIVEL = {
+  motivo: 'Motivo del descarte', categoria: 'Línea', familia: 'Familia',
+  subfamilia: 'Subfamilia', medida: 'Medida estándar'
+};
+/* Orden de navegación por tienda (modo "general"). La tienda que no está
+   aquí usa el orden por defecto (Línea → Familia → Subfamilia).
+   Decisión de operaciones del 9-oct-2026: dib y bazhars entran directo a
+   Familia → Subfamilia → Medida estándar, sin el paso de Línea. sur no
+   se tocó y sigue como antes. Para agregar otra tienda a este orden,
+   o para revertir alguna, basta editar este mapa. */
+var ORDEN_NAVEGACION = {
+  dib:     ['familia', 'subfamilia', 'medida'],
+  bazhars: ['familia', 'subfamilia', 'medida']
+};
+var NIVELES_DEFECTO = ['categoria', 'familia', 'subfamilia'];
+
 /**
- * Rutas distintas (motivo/línea/familia/subfamilia) con cantidad de productos.
+ * Rutas distintas (según ORDEN_NAVEGACION) con cantidad de productos.
  * Es lo único "global" que recibe el navegador: ~700 filas cortas, sin precios ni SKU.
  */
 function hTaxonomia_(tienda, modo) {
@@ -57,19 +75,26 @@ function hTaxonomia_(tienda, modo) {
     var raw = erpTaxonomia_(tienda);
     var cfg = CONFIG_TIENDAS[tienda];
     var items = filtrarPorModo_((raw.records || []).map(function (r) { return aProducto_(r, cfg); }), modo);
+
+    var campos = modo === 'descartados'
+      ? ['motivo', 'categoria', 'familia', 'subfamilia']
+      : (ORDEN_NAVEGACION[tienda] || NIVELES_DEFECTO);
+    var niveles = campos.map(function (c) { return { campo: c, rotulo: ROTULOS_NIVEL[c] }; });
+
     var m = {}, orden = [];
     items.forEach(function (p) {
-      var k = [p.motivo, p.categoria, p.familia, p.subfamilia].join('|');
-      if (!m[k]) { m[k] = { motivo: p.motivo, categoria: p.categoria, familia: p.familia, subfamilia: p.subfamilia, n: 0 }; orden.push(k); }
+      var valores = campos.map(function (c) { return p[c] || '—'; });
+      var k = valores.join('|');
+      if (!m[k]) {
+        var fila = { n: 0 };
+        campos.forEach(function (c, i) { fila[c] = valores[i]; });
+        m[k] = fila; orden.push(k);
+      }
       m[k].n++;
     });
     return {
       ok: true, tienda: tienda, modo: modo,
-      niveles: modo === 'descartados'
-        ? [{ campo: 'motivo', rotulo: 'Motivo del descarte' }, { campo: 'categoria', rotulo: 'Línea' },
-           { campo: 'familia', rotulo: 'Familia' }, { campo: 'subfamilia', rotulo: 'Subfamilia' }]
-        : [{ campo: 'categoria', rotulo: 'Línea' }, { campo: 'familia', rotulo: 'Familia' },
-           { campo: 'subfamilia', rotulo: 'Subfamilia' }],
+      niveles: niveles,
       rutas: orden.map(function (k) { return m[k]; })
     };
   });

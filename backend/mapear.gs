@@ -15,6 +15,7 @@ function aProducto_(r, cfg) {
     categoria: String(r.x_linea || ''),
     familia: String(r.x_familia || 'SIN FAMILIA'),
     subfamilia: String(r.x_subfamilia || 'SIN SUBFAMILIA'),
+    medida: medidaEstandar_(nombre),
     precio_normal: lista,
     dto: dto,
     precio_oferta: redondear_(r.x_precio_vigente != null ? Number(r.x_precio_vigente) : lista * (1 - dto / 100), (cfg && cfg.redondeo) || 'peso'),
@@ -38,6 +39,16 @@ function redondear_(n, modo) {
 
 function norm_(s) {
   return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+}
+
+/** Medida estándar (ej. "160X230") para navegar/filtrar por tamaño. Misma
+ *  regla que usa el frontend (_MED en app.js) para que ambos lados calcen;
+ *  si el nombre no trae una medida reconocible, vuelve ''. */
+var _MED_NIVEL = /\b0*(\d{2,4})\s*[xX]\s*0*(\d{2,4})(?:\s*[xX]\s*0*(\d{2,4}))?\b/;
+function medidaEstandar_(nombre) {
+  var m = _MED_NIVEL.exec(String(nombre || ''));
+  if (!m) return '';
+  return [m[1], m[2], m[3]].filter(Boolean).map(function (x) { return String(+x); }).join('X');
 }
 
 /**
