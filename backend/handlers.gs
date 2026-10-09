@@ -56,12 +56,12 @@ var ROTULOS_NIVEL = {
 };
 /* Orden de navegación por tienda (modo "general"). La tienda que no está
    aquí usa el orden por defecto (Línea → Familia → Subfamilia).
-   Decisión de operaciones del 9-oct-2026: dib y bazhars entran directo a
-   Familia → Subfamilia → Medida estándar, sin el paso de Línea. sur no
-   se tocó y sigue como antes. Para agregar otra tienda a este orden,
-   o para revertir alguna, basta editar este mapa. */
+   Decisión de operaciones del 9-oct-2026: las tres tiendas entran directo
+   a Familia → Subfamilia → Medida estándar, sin el paso de Línea. Para
+   dejar alguna con el orden anterior, basta sacarla de este mapa. */
 var ORDEN_NAVEGACION = {
   dib:     ['familia', 'subfamilia', 'medida'],
+  sur:     ['familia', 'subfamilia', 'medida'],
   bazhars: ['familia', 'subfamilia', 'medida']
 };
 var NIVELES_DEFECTO = ['categoria', 'familia', 'subfamilia'];
