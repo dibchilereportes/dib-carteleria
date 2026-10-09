@@ -70,6 +70,11 @@ var NIVELES_DEFECTO = ['categoria', 'familia', 'subfamilia'];
  * Rutas distintas (según ORDEN_NAVEGACION) con cantidad de productos.
  * Es lo único "global" que recibe el navegador: ~700 filas cortas, sin precios ni SKU.
  */
+/** Fracción mínima de productos con medida reconocible para que una
+ *  familia+subfamilia use el nivel "medida" de verdad. Por debajo de esto,
+ *  toda la rama queda en '—' y el frontend la salta sola (ver hTaxonomia_). */
+var UMBRAL_MEDIDA = 0.5;
+
 function hTaxonomia_(tienda, modo) {
   return conCache_('tax:' + tienda + ':' + modo, 21600, function () {
     var raw = erpTaxonomia_(tienda);
@@ -80,6 +85,23 @@ function hTaxonomia_(tienda, modo) {
       ? ['motivo', 'categoria', 'familia', 'subfamilia']
       : (ORDEN_NAVEGACION[tienda] || NIVELES_DEFECTO);
     var niveles = campos.map(function (c) { return { campo: c, rotulo: ROTULOS_NIVEL[c] }; });
+
+    /* "medida" se apaga por rama (familia+subfamilia) cuando casi ningún
+       producto de esa rama trae una medida reconocible: evita un chip "—"
+       con casi todo adentro, que no ayuda a decidir más rápido. */
+    if (campos.indexOf('medida') >= 0) {
+      var porRama = {};
+      items.forEach(function (p) {
+        var k = p.familia + '|' + p.subfamilia;
+        if (!porRama[k]) porRama[k] = { total: 0, conMedida: 0 };
+        porRama[k].total++;
+        if (p.medida) porRama[k].conMedida++;
+      });
+      items.forEach(function (p) {
+        var r = porRama[p.familia + '|' + p.subfamilia];
+        if (!r.total || (r.conMedida / r.total) < UMBRAL_MEDIDA) p.medida = '';
+      });
+    }
 
     var m = {}, orden = [];
     items.forEach(function (p) {
