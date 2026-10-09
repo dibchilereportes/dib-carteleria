@@ -1182,14 +1182,24 @@ let RUTA = [];   /* p.ej. ["ALFOMBRAS", "ALF. KELIMES"] */
 
 /* Rutas (línea/familia/subfamilia/motivo) con conteo, las entrega el backend (action=taxonomia). */
 let RUTAS = [];
+/* Cuando una familia existe en más de una línea (ej. "Toallas" en Baño,
+   Hotelería y Textil Hogar) el backend manda familia_etiqueta con la línea
+   entre paréntesis para esa fila, además de la familia real (familia) y la
+   línea real (familia_linea). valorNivel_ es lo que se ve y se usa para
+   armar los chips; la familia real se recupera recién al armar el filtro
+   (ver buscar()), para no romper el filtro contra Odoo. */
+function valorNivel_(r, campo) {
+  if (campo === "familia" && r.familia_etiqueta) return r.familia_etiqueta;
+  return r[campo] || "—";
+}
 function enRuta(ruta) {
-  return RUTAS.filter(r => ruta.every((v, i) => r[NIVELES[i].campo] === v));
+  return RUTAS.filter(r => ruta.every((v, i) => valorNivel_(r, NIVELES[i].campo) === v));
 }
 function opcionesNivel(ruta) {
   const i = ruta.length;
   if (i >= NIVELES.length) return [];
   const campo = NIVELES[i].campo, m = {};
-  enRuta(ruta).forEach(r => { const v = r[campo] || "—"; m[v] = (m[v] || 0) + (r.n || 1); });
+  enRuta(ruta).forEach(r => { const v = valorNivel_(r, campo); m[v] = (m[v] || 0) + (r.n || 1); });
   return Object.keys(m).sort((a, b) => m[b] - m[a] || a.localeCompare(b, "es"))
     .map(v => ({ v: v, n: m[v] }));
 }
@@ -1237,7 +1247,19 @@ async function buscar() {
     return;
   }
   const filtros = { tienda: TIENDA, modo: MODO, q: q, limit: 100 };
-  RUTA.forEach((v, i) => { filtros[NIVELES[i].campo === "categoria" ? "linea" : NIVELES[i].campo] = v; });
+  RUTA.forEach((v, i) => {
+    const campo = NIVELES[i].campo;
+    if (campo === "categoria") { filtros.linea = v; return; }
+    if (campo === "familia") {
+      /* v puede ser la etiqueta desambiguada ("Toallas (Baño)"): recuperar
+         la familia real y su línea desde RUTAS para filtrar bien en Odoo. */
+      const fila = RUTAS.find(r => r.familia_etiqueta === v);
+      if (fila) { filtros.familia = fila.familia; filtros.linea = fila.familia_linea; }
+      else filtros.familia = v;
+      return;
+    }
+    filtros[campo] = v;
+  });
   const id = ++_busq;
   box.classList.add("cargando");
   let r;

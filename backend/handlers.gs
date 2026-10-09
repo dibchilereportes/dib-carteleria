@@ -103,13 +103,40 @@ function hTaxonomia_(tienda, modo) {
       });
     }
 
+    /* Si "familia" es un nivel pero "categoria" (línea) no lo es, una misma
+       familia puede existir en más de una línea (ej. "Toallas" en Baño,
+       Hotelería y Textil Hogar): sin desambiguar, sus productos se
+       mezclarían en el mismo chip. Para las que chocan, se arma una
+       etiqueta con la línea entre paréntesis SOLO para mostrar; "familia"
+       sigue siendo el nombre real que entiende Odoo, así que el filtro no
+       se rompe (el frontend recupera la familia real + la línea desde
+       familia_etiqueta/familia_linea antes de pedir resultados). */
+    var familiaEsNivel = campos.indexOf('familia') >= 0;
+    var lineaEsNivel = campos.indexOf('categoria') >= 0;
+    var familiasAmbiguas = {};
+    if (familiaEsNivel && !lineaEsNivel) {
+      var porFamilia = {};
+      items.forEach(function (p) {
+        if (!porFamilia[p.familia]) porFamilia[p.familia] = {};
+        porFamilia[p.familia][p.categoria] = 1;
+      });
+      Object.keys(porFamilia).forEach(function (f) {
+        if (Object.keys(porFamilia[f]).length > 1) familiasAmbiguas[f] = true;
+      });
+    }
+
     var m = {}, orden = [];
     items.forEach(function (p) {
-      var valores = campos.map(function (c) { return p[c] || '—'; });
+      var ambigua = familiaEsNivel && !lineaEsNivel && familiasAmbiguas[p.familia || '—'];
+      var valores = campos.map(function (c) {
+        if (c === 'familia' && ambigua) return (p.familia || '—') + '\u0001' + p.categoria;  // solo para desduplicar filas
+        return p[c] || '—';
+      });
       var k = valores.join('|');
       if (!m[k]) {
         var fila = { n: 0 };
-        campos.forEach(function (c, i) { fila[c] = valores[i]; });
+        campos.forEach(function (c, i) { fila[c] = c === 'familia' ? (p.familia || '—') : valores[i]; });
+        if (ambigua) { fila.familia_etiqueta = (p.familia || '—') + ' (' + p.categoria + ')'; fila.familia_linea = p.categoria; }
         m[k] = fila; orden.push(k);
       }
       m[k].n++;
