@@ -16,6 +16,14 @@
       "plantillas": ["ALF_9X11", "ALF_65X9", "MUEBLES_8X5", "TEX_LIM_NORMAL", "TEX_LIM_PROMO", "ROLLER_13X18"],
       "modos": ["general", "descartados"],
       "redondeo": "peso"
+    },
+    "bazhars": {
+      "nombre": "Tienda Bazhars",
+      "acento": "#A8432F",
+      "lista_erp": "Tiendas Bazhars",
+      "plantillas": ["ALF_9X11", "ALF_65X9", "MUEBLES_8X5", "TEX_LIM_NORMAL", "TEX_LIM_PROMO", "ROLLER_13X18"],
+      "modos": ["general", "descartados"],
+      "redondeo": "peso"
     }
   },
   "modos": {
