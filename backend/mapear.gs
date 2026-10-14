@@ -44,7 +44,7 @@ function norm_(s) {
 /** Medida estándar (ej. "160X230") para navegar/filtrar por tamaño. Misma
  *  regla que usa el frontend (_MED en app.js) para que ambos lados calcen;
  *  si el nombre no trae una medida reconocible, vuelve ''. */
-var _MED_NIVEL = /\b0*(\d{2,4})\s*[xX]\s*0*(\d{2,4})(?:\s*[xX]\s*0*(\d{2,4}))?\b/;
+var _MED_NIVEL = /\b0*(\d{2,4})\s*[xX]\s*0*(\d{2,4})(?:\s*[xX]\s*0*(\d{2,4}))?/;
 function medidaEstandar_(nombre) {
   var m = _MED_NIVEL.exec(String(nombre || ''));
   if (!m) return '';
